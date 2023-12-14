@@ -25,7 +25,7 @@ void emptymap(int n,int mapArray[][2*n-1]){
 }
 
 //int main () {
-//    printf("please enter a number between 2 and 20:\n");
+//    printf(/"please enter a number between 2 and 20:\n");
 //    int n ;
 //    scanf("%d",&n);
 //    int map[2*n-1][2*n-1];
