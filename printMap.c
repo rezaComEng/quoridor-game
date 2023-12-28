@@ -21,11 +21,13 @@ void printmap(int n , char map[][2*n-1]) {
                 printf(" %c ",map[i][j]);
             }
             else if (i%2==0 || j%2==0) {
-                if (map[i][j] == 215 || map[i][j] == 205 || map[i][j] == 216 || map[i][j] == 186) {
-                    setTextColor(4,1);
-                    printf("%c",map[i][j]);
+                setTextColor(5,1);
+                switch (map[i][j]){
+                    case 215:
+                    case 205:
+                    case 216:
+                    case 186: setTextColor(4,4);
                 }
-                setTextColor(7,1);
                 printf(" %c ",map[i][j]);
             }
             else {
