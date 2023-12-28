@@ -1,36 +1,60 @@
 
 #include <stdio.h>
-#include <stdlib.h>
-#include "EmptyMap.c"
+#include <conio.h>
+#pragma "EmptyMap.c"
+#include "printMap.c"
+#include "exit function.c"
+
 
 int main(){
     int side;
     int x1,y1,x2,y2;
     int numofwall1,numofwall2;
     scanf ("%d",&side);
-    int map[2*side-1][2*side-1];
+    char map[2*side-1][2*side-1];
     emptymap(side,map);
     scanf ("%d %d",&x1,&y1);
-    map[2*x1-1][2*y1-1]='*';
+    map[2*x1+1][2*y1+1]='*';
     scanf ("%d %d",&x2,&y2);
-    map[2*x2-1][2*y2-1]='@';
+    map[2*x2+1][2*y2+1]='@';
     scanf ("%d",&numofwall1);
     for (int i=0 ; i<numofwall1 ; i++){
         int xwall,ywall;
         char typewall;
         scanf ("%d %d %c",&xwall,&ywall,&typewall);
-
+        if (typewall=='H') {
+            for(int j=2*ywall+1 ; j<=2*ywall+3 ; j++) {
+                if (j%2==0) map[2*xwall][j]=216;
+                else map[2*xwall][j]=205;
+            }
+        }
+        else if (typewall=='V') {
+            for(int k=2*xwall+1 ; k<=2*xwall+3 ; k++) {
+                if (k%2==0) map[k][2*ywall]=215;
+                else map[k][2*ywall]=186;
+            }
+        }
     }
-    scanf ("%d",&numofwall1);
+    scanf ("%d",&numofwall2);
     for (int i=0 ; i<numofwall2 ; i++){
         int xwall,ywall;
         char typewall;
         scanf ("%d %d %c",&xwall,&ywall,&typewall);
+        if (typewall=='H') {
+            for(int j=2*ywall+1 ; j<=2*ywall+3 ; j++) {
+                if (j%2==0) map[2*xwall][j]=216;
+                else map[2*xwall][j]=205;
+            }
+        }
+        else if (typewall=='V') {
+            for(int k=2*xwall+1 ; k<=2*xwall+3 ; k++) {
+                if (k%2==0) map[k][2*ywall]=215;
+                else map[k][2*ywall]=186;
+            }
+        }
     }
-    for (int i=0 ; i<side*2-1 ; i++) {
-        for (int j = 0; j < 2 * side - 1; j++)
-            printf("%c  ", map);
-        printf("\n");
-    }
+    printf("\n");
+    printmap(side, map);
+    exitButton();
     return 0;
 }
