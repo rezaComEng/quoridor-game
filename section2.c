@@ -1,74 +1,71 @@
 #include <stdio.h>
-#include <windows.h>
-#include <conio.h>
-#include <time.h>
-#include "printMap.c"
-#pragma "EmptyMap.c"
-#include "exit function.c"
+#include "all functions.c"
 
-void putplayer(int length , char map[][2*length-1] ,int x ,int y , char ch) {
-    map[x][y] = ch;
-}
+struct players;
+void emptymap(int n,char mapArray[][n *2 -1]);
+void setTextColor(int textColor, int backColor);
+void printMap(int side, char map[][2*side-1]);
+void printinformation(const struct players list[], int numofplayers);
+void gotoxy(int x , int y);
+void clearScreen();
+int choseMoveOrWall();
+int putWall(int side,char map[][2*side-1]);
+int playersMovement(int side , char map[][2*side-1],struct players *p);
+void putplayer(int length , char map[][2*length-1] ,int x ,int y , char ch);
+void exitButton();
 
-void gotoxy(int x , int y) {
-    HANDLE cosoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD cousorCoord;
-    cousorCoord.X = y;
-    cousorCoord.Y = x;
-    SetConsoleCursorPosition(cosoleHandle, cousorCoord);
-}
 
-void clearScreen() {
-    system("cls");
-}
-
-void putWall(int side,char map[][2*side-1]){
-    char x,y,type;
-    printf("Please enter the coordinates and type ('h' for horizontal & 'v' for vertical) of the wall(like this ==> 3 4 h):");
-    scanf("%c %c %c",&x,&y,&type);
-    if (type=='v'){
-        map[x+1][y]= 186;
-        map[x+2][y]= 215;
-        map[x+3][y]= 186;
-    }
-    else if (type=='h'){
-        map[x][y+1]= 205;
-        map[x][y+2]= 216;
-        map[x][y+3]= 205;
-    }
-    clearScreen();
-    printmap(side,map);
-}
-
-int ChoseMoveOrWall(){
-    char selection;
-    scanf("%c",&selection);
-    if (selection=='m') return 1;
-    else if (selection=='w') return 2;
-    else ChoseMoveOrWall();
-}
-
-int main () {
-    int side;
+        int main () {
     printf("Please enter the length of the game map (must be even and between 4 and 20!!!): ");
+    int side;
     scanf("%d",&side);
+    int numofplayers=2;
+    struct players list[numofplayers];
+    printf("Enter the number of allowed walls!!!:");
     int walls;
-    printf("\nEnter the number of allowed walls!!!:");
     scanf("%d",&walls);
-    char nameFP[20],nameSP[20];
-    printf("\nEnter the first player's name:");
-    scanf("%s",nameFP);
-    printf("\nEnter the name of the second player:");
-    scanf("%s",nameSP);
+    list[0].x=2*side-3,list[1].x=1;
+    list[0].y=list[1].y=((2*side-1)/2);
+    list[0].shape='*',list[1].shape='o';
+    list[0].numofwall=list[1].numofwall=walls;
+    printf("Enter the first player's name:");
+    scanf("%s",list[0].name);
+    printf("Enter the name of the second player:");
+    scanf("%s",list[1].name);
     char map[2*side-1][2*side-1];
     emptymap(side , map);
-    putplayer(side , map ,1 , (2*side-1)/2 , '*');
-    putplayer(side , map ,2*side-3 , (2*side-1)/2 , '@');
-    printmap(side,map);
-    printf("Press 'm' to move or 'w' to place the wall:");
-    int resulte=ChoseMoveOrWall();
-    if (resulte==2) {
-        putWall(side,map);
+    putplayer(side , map ,list[0].x , list[0].y  , list[0].shape);
+    putplayer(side , map ,list[1].x , list[1].y , list[1].shape);
+    for (int i=0 ; i<100 ; i++){
+        int turn=(i%2)+1;
+        clearScreen();
+        printinformation(list,numofplayers);
+        printf("it`s player %d`s turn.",turn);
+        printMap(side,map);
+        int sw=1;
+        while (sw==1) {
+            int resulte=choseMoveOrWall();
+            if (resulte==1) {
+                playersMovement(side,map,&list[turn-1]);
+                clearScreen();
+                printinformation(list,numofplayers);
+                printf("it`s player %d`s turn.",turn);
+                printMap(side,map);
+                sw=0;
+            }
+            else if (resulte==2) {
+                if (putWall(side,map)==0) {
+                    clearScreen();
+                    printinformation(list,numofplayers);
+                    printf("it`s player %d`s turn.",turn);
+                    printMap(side,map);
+                }
+                else if (putWall(side,map)==1) {
+                    sw=0;
+                    list[turn-1].numofwall --;
+                }
+            }
+        }
     }
     exitButton();
     return 0;

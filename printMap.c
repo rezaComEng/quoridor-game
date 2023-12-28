@@ -2,8 +2,6 @@
 
 #include <stdio.h>
 #include <windows.h>
-#include <conio.h>
-#include <time.h>
 #include "EmptyMap.c"
 
 void setTextColor(int textColor, int backColor) {
@@ -12,7 +10,7 @@ void setTextColor(int textColor, int backColor) {
     SetConsoleTextAttribute(consoleHandle , colorAttribute);
 }
 
-void printmap(int n , char map[][2*n-1]) {
+void printMap(int n , char map[][2*n-1]) {
     printf("\n");
     for (int i=0 ; i<2*n-1 ; i++) {
         for (int j=0 ; j<2*n-1 ; j++) {
@@ -21,11 +19,8 @@ void printmap(int n , char map[][2*n-1]) {
                 printf(" %c ",map[i][j]);
             }
             else if (i%2==0 || j%2==0) {
-                if (map[i][j] == 215 || map[i][j] == 205 || map[i][j] == 216 || map[i][j] == 186) {
-                    setTextColor(4,1);
-                    printf("%c",map[i][j]);
-                }
-                setTextColor(7,1);
+                setTextColor(5,1);
+                if (map[i][j]==215 || map[i][j]==205 || map[i][j]==216 || map[i][j]==186) setTextColor(4,4);
                 printf(" %c ",map[i][j]);
             }
             else {
@@ -36,4 +31,5 @@ void printmap(int n , char map[][2*n-1]) {
         printf("\n");
     }
     setTextColor(7,0);
+    printf("\n");
 }
