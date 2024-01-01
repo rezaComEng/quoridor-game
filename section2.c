@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "all functions.c"
+#include "allFunctions.c"
 
 struct players;
 void emptymap(int n,char mapArray[][n *2 -1]);
@@ -9,7 +9,7 @@ void printinformation(const struct players list[], int numofplayers);
 void clearScreen();
 int choseMoveOrWall();
 int putWall(int side,char map[][2*side-1]);
-int playersMovement(int side , char map[][2*side-1],struct players *p);
+int playersMovement(int side , char map[][2*side-1],int turn ,struct players *p);
 void putplayer(int length , char map[][2*length-1] ,int x ,int y , char ch);
 void exitButton();
 
@@ -44,7 +44,7 @@ int main () {
         printf("Press 'm' to move or 'w' to place the wall:");
         int result = choseMoveOrWall();
         if (result == 1) {
-            int a=playersMovement(side, map, &list[turn- 1]);
+            int a= playersMovement(side,map,turn, list);
             if (a==0) i--;
         }
         else if (result == 2) {

@@ -127,90 +127,78 @@ int putWall(int side,char map[][2*side-1]){
     return sw;
 }
 
-int playersMovement(int side , char map[][2*side-1],struct players *p){
+int playersMovement(int side , char map[][2*side-1],int turn,struct players list[]){
+    int turn2,sw=1;
+    if (turn==1) turn2=2;
+    else turn2=1;
     printf("enter button to move the player: ");
     char button = getch();
-//    int dx=0,dy=0;
-//
-//    if (button == 72) dx -= 2;
-//    else if (button == 80) dx += 2;
-//    else if (button == 77) dy += 2;
-//    else if (button == 75) dy -= 2;
-//
-//    if ( p->x+dx<1 || p->x+dx>2*side-3 || p->y+dy<1 || p->y+dy>2*side-3 || isblock(p->x+(dx/2),p->y+(dy/2),side,map)) {
-//        playersMovement(side, map, p);
-//        return 0;
-//    }
-//    map[p->x][p->y]=' ';
-//    p->x += dx;
-//    p->y += dy;
-//    map[p->x][p->y]=p->shape;
-//    return 1;
     if (button == 72) {
-        if ( p->x==1 || map[p->x-1][p->y]=='=') return 0;
+        if ( list[turn-1].x==1 || map[list[turn-1].x-1][list[turn-1].y]=='=') return 0;
         else {
-            map[p->x][p->y] = ' ';
-            p->x -= 2;
-            map[p->x][p->y] = p->shape;
-            return 1;
+            map[list[turn-1].x][list[turn-1].y] = ' ';
+            list[turn-1].x -= 2;
+            if (map[list[turn-1].x][list[turn-1].y]==list[turn2-1].shape){
+                list[turn-1].x -= 2;
+                map[list[turn-1].x][list[turn-1].y] = list[turn-1].shape;
+                sw=0;
+            }
+            else {
+                map[list[turn-1].x][list[turn-1].y] = list[turn-1].shape;
+                return 1;
+            }
         }
     }
     else if (button == 80) {
-        if (p->x==2*side-3 || map[p->x-1][p->y]=='=') return 0;
+        if (list[turn-1].x==2*side-3 || map[list[turn-1].x+1][list[turn-1].y]=='=') return 0;
         else {
-            map[p->x][p->y]=' ';
-            p->x += 2;
-            map[p->x][p->y]=p->shape;
-            return 1;
+            map[list[turn-1].x][list[turn-1].y]=' ';
+            list[turn-1].x += 2;
+            if (map[list[turn-1].x][list[turn-1].y]==list[turn2-1].shape){
+                list[turn-1].x += 2;
+                map[list[turn-1].x][list[turn-1].y] = list[turn-1].shape;
+                sw=0;
+            }
+            else {
+                map[list[turn-1].x][list[turn-1].y]=list[turn-1].shape;
+                return 1;
+            }
         }
     }
     else if (button == 77) {
-        if (p->y==2*side-3 || map[p->x][p->y+1]=='!') return 0;
+        if (list[turn-1].y==2*side-3 || map[list[turn-1].x][list[turn-1].y+1]=='!') return 0;
         else {
-            map[p->x][p->y]=' ';
-            p->y += 2;
-            map[p->x][p->y]=p->shape;
-            return 1;
+            map[list[turn-1].x][list[turn-1].y]=' ';
+            list[turn-1].y += 2;
+            if (map[list[turn-1].x][list[turn-1].y]==list[turn2-1].shape){
+                list[turn-1].y += 2;
+                map[list[turn-1].x][list[turn-1].y] = list[turn-1].shape;
+                sw=0;
+            }
+            else {
+                map[list[turn-1].x][list[turn-1].y]=list[turn-1].shape;
+                return 1;
+            }
         }
     }
     else if (button == 75) {
-        if (p->y==1 || map[p->x][p->y-1]=='!') return 0;
+        if (list[turn-1].y==1 || map[list[turn-1].x][list[turn-1].y-1]=='!') return 0;
         else {
-            map[p->x][p->y]=' ';
-            p->y -= 2;
-            map[p->x][p->y]=p->shape;
-            return 1;
+            map[list[turn-1].x][list[turn-1].y]=' ';
+            list[turn-1].y -= 2;
+            if (map[list[turn-1].x][list[turn-1].y]==list[turn2-1].shape){
+                list[turn-1].y -= 2;
+                map[list[turn-1].x][list[turn-1].y] = list[turn-1].shape;
+                sw=0;
+            }
+            else {
+                map[list[turn-1].x][list[turn-1].y]=list[turn-1].shape;
+                return 1;
+            }
         }
     }
-    playersMovement(side, map, p);
+    if (sw==1) playersMovement(side, map,turn,list);
 }
-
-//int playersMovement(int side, char map[][2*side-1], struct players *p) {
-//    printf("enter button to move the player: ");
-//    char button = getch();
-//    int dx = 0, dy = 0;
-//    switch (button) {
-//        case 72: dx = -2; break; // UP
-//        case 80: dx = 2; break;  // DOWN
-//        case 77: dy = 2; break;  // RIGHT
-//        case 75: dy = -2; break; // LEFT
-//    }
-//    int newX = p->x + dx;
-//    int newY = p->y + dy;
-//
-//    int wallx = p->x + dx/2;
-//    int wally = p->y + dy/2;
-//
-//    if (newX < 0 || newY < 0 || newX > 2*side-3 || newY > 2*side-3 || isblock(wallx, wally, side, map)) {
-//        return 0;
-//    } else {
-//        map[p->x][p->y]=' ';
-//        p->x = newX;
-//        p->y = newY;
-//        map[p->x][p->y]=p->shape;
-//        return 1;
-//    }
-//}
 
 void putplayer(int length , char map[][2*length-1] ,int x ,int y , char ch) {
     map[x][y] = ch;
