@@ -22,7 +22,7 @@ int main(){
     map[2*x2+1][2*y2+1]='@';
     printf("Enter the number of walls for the first player:");
     scanf ("%d",&numofwall1);
-    for (int i=0 ; i<numofwall1 ; i++){
+    for (int i=0 ; i<numofwall1 ; i++) {
         int xwall,ywall;
         char typewall;
         printf("Enter the coordinates and type of wall %d(like this:1 1 H or 2 2 V):",i+1);
