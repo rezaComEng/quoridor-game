@@ -3,8 +3,6 @@
 #include <conio.h>
 #include <stdlib.h>
 
-int isblock(int x, int y,int side,char map[][2*side-1]);
-
 struct players {
     char name[20];
     char shape;
@@ -42,20 +40,35 @@ void setTextColor(int textColor, int backColor) {
 
 void printMap(int n , char map[][2*n-1]) {
     printf("\n");
-    for (int i=0 ; i<2*n-1 ; i++) {
-        for (int j=0 ; j<2*n-1 ; j++) {
-            if (i==0 || j==0 || i==2*n-2 || j==2*n-2 ) {
-                setTextColor(7,0);
-                printf(" %c ",map[i][j]);
-            }
-            else if (i%2==0 || j%2==0) {
-                setTextColor(5,0);
-                if (map[i][j]==215 || map[i][j]==205 || map[i][j]==216 || map[i][j]==186) setTextColor(4,4);
-                printf(" %c ",map[i][j]);
+    for (int i=-1 ; i<2*n-1 ; i++) {
+        for (int j=-1 ; j<2*n-1 ; j++) {
+            if ((i==-1 || j==-1) ) {
+                if ((i+2)%2==0 && (j+2)%2==1){
+                    setTextColor(9,0);
+                    printf("%2d",(i)*(j+2)/2);
+                }
+                else if((i+2)%2==1 && (j+2)%2==0) {
+                    setTextColor(9,0);
+                    printf("%2d  ",(i+2)*(j)/2);
+                }
+                else {
+                    printf("  ");
+                }
             }
             else {
-                setTextColor(15,8);
-                printf(" %c ",map[i][j]);
+                if (i==0 || j==0 || i==2*n-2 || j==2*n-2 ) {
+                    setTextColor(7,0);
+                    printf(" %c ",map[i][j]);
+                }
+                else if (i%2==0 || j%2==0) {
+                    setTextColor(5,0);
+                    if (map[i][j]=='=' || map[i][j]==':') setTextColor(4,0);
+                    printf(" %c ",map[i][j]);
+                }
+                else {
+                    setTextColor(15,8);
+                    printf(" %c ",map[i][j]);
+                }
             }
         }
         printf("\n");
@@ -78,14 +91,6 @@ void printinformation(const struct players list[], int numofplayers) {
     }
 }
 
-void gotoxy(int x , int y) {
-    HANDLE cosoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD cousorCoord;
-    cousorCoord.X = y;
-    cousorCoord.Y = x;
-    SetConsoleCursorPosition(cosoleHandle, cousorCoord);
-}
-
 void clearScreen() {
     system("cls");
 }
@@ -98,7 +103,17 @@ int choseMoveOrWall(){
     else choseMoveOrWall();
 }
 
-int putWall(int side,char map[][2*side-1]){
+void DeepFirstSearch(int xpoint,int ypoint,int side,char map[][2*side-1],int visit[side-1][side-1]){
+    int xv=(xpoint-1)/2,yv=(ypoint-1)/2;
+    visit[xv][yv] = 1;
+    if (xv<side-2 && map[xpoint+1][ypoint]!='=' && visit[xv+1][yv]!=1) DeepFirstSearch(xpoint+2,ypoint,side,map,visit);
+    if (xv>0 && map[xpoint-1][ypoint]!='=' && visit[xv-1][yv]!=1) DeepFirstSearch(xpoint-2,ypoint,side,map,visit);
+    if (yv<side-2 && map[xpoint][ypoint+1]!=':' && visit[xv][yv+1]!=1) DeepFirstSearch(xpoint,ypoint+2,side,map,visit);
+    if (yv>0 && map[xpoint][ypoint-1]!=':' && visit[xv][yv-1]!=1) DeepFirstSearch(xpoint,ypoint-2,side,map,visit);
+    return ;
+}
+
+int putWall(struct players list[],int side,char map[][2*side-1]){
     int x,y;
     char type;
     printf("\nPlease enter the coordinates and type ('h' for horizontal & 'v' for vertical) of the wall(like this ==> 3 4 h):");
@@ -116,12 +131,37 @@ int putWall(int side,char map[][2*side-1]){
     }
     if (sw==1) {
         if (type=='v'){
-            map[2*x+1][2*y]= '!';
-            map[2*x+3][2*y]=  '!';
+            map[2*x+1][2*y]= ':';
+            map[2*x+3][2*y]=  ':';
         }
         else if (type=='h'){
             map[2*x][2*y+1]= '=';
             map[2*x][2*y+3]= '=';
+        }
+        int sw2=0,sw3=0;
+        int visit[side-1][side-1];
+        for (int i=0 ; i<side-1 ; i++)
+            for (int j=0 ; j<side-1 ; j++)
+                visit[i][j]=0;
+        DeepFirstSearch(list[0].x,list[0].y,side,map,visit);
+        for (int i=0 ; i<side-1 ; i++)
+            if (visit[0][i]==1) sw2=1;
+        for (int i=0 ; i<side-1 ; i++)
+            for (int j=0 ; j<side-1 ; j++)
+                visit[i][j]=0;
+        DeepFirstSearch(list[1].x,list[1].y,side,map,visit);
+        for (int i=0 ; i<side-1 ; i++)
+            if (visit[side-2][i]==1) sw3=1;
+        if (sw2==0 || sw3==0) {
+            sw=0;
+            if (type=='v'){
+                map[2*x+1][2*y]= 179;
+                map[2*x+3][2*y]=  179;
+            }
+            else if (type=='h'){
+                map[2*x][2*y+1]= 196;
+                map[2*x][2*y+3]= 196;
+            }
         }
     }
     return sw;
@@ -207,11 +247,6 @@ void putplayer(int length , char map[][2*length-1] ,int x ,int y , char ch) {
 int iswinner(int locWin,const struct players new) {
     if (new.x==locWin) return 1;
     else return 0;
-}
-
-int isblock(int x, int y,int side,char map[][2*side-1]){
-    if (map[x][y] == 205 || map[x][y] == 186) return 1;
-    return 0;
 }
 
 void exitButton() {

@@ -28,15 +28,13 @@ int main(){
         printf("Enter the coordinates and type of wall %d(like this:1 1 H or 2 2 V):",i+1);
         scanf ("%d %d %c",&xwall,&ywall,&typewall);
         if (typewall=='H') {
-            for(int j=2*ywall+1 ; j<=2*ywall+3 ; j++) {
-                if (j%2==0) map[2*xwall][j]=216;
-                else map[2*xwall][j]=205;
+            for(int j=2*ywall+1 ; j<=2*ywall+3 ; j+=2) {
+                map[2*xwall][j]='=';
             }
         }
         else if (typewall=='V') {
-            for(int k=2*xwall+1 ; k<=2*xwall+3 ; k++) {
-                if (k%2==0) map[k][2*ywall]=215;
-                else map[k][2*ywall]=186;
+            for(int k=2*xwall+1 ; k<=2*xwall+3 ; k+=2) {
+                map[k][2*ywall]=':';
             }
         }
     }
@@ -48,15 +46,13 @@ int main(){
         printf("Enter the coordinates and type of wall %d(like this:1 1 H or 2 2 V):",i+1);
         scanf ("%d %d %c",&xwall,&ywall,&typewall);
         if (typewall=='H') {
-            for(int j=2*ywall+1 ; j<=2*ywall+3 ; j++) {
-                if (j%2==0) map[2*xwall][j]=216;
-                else map[2*xwall][j]=205;
+            for(int j=2*ywall+1 ; j<=2*ywall+3 ; j+=2) {
+                map[2*xwall][j]='=';
             }
         }
         else if (typewall=='V') {
             for(int k=2*xwall+1 ; k<=2*xwall+3 ; k++) {
-                if (k%2==0) map[k][2*ywall]=215;
-                else map[k][2*ywall]=186;
+                map[k][2*ywall]=':';
             }
         }
     }

@@ -23,24 +23,3 @@ void emptymap(int n,char mapArray[][n *2 -1]){
         }
     }
 }
-
-//int main () {
-//    printf("please enter a number between 2 and 20:\n");
-//    int n ;
-//    scanf("%d",&n);
-//    int map[2*n-1][2*n-1];
-//    emptymap(n,map);
-//    for (int i=0 ; i<2*n-1 ; i++){
-//        for (int j=0 ; j<2*n-1 ; j++){
-//            printf("%c  ",map[i][j]);
-//        }
-//        printf("\n");
-//    }
-//    char ch;
-//    printf("please press Esc button for exit:\n");
-//    do{
-//        ch=getch();
-//        printf("wrong button!\n");
-//    } while (ch !=27);
-//    return 0;
-//}

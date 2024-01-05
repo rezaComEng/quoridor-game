@@ -1,17 +1,6 @@
 #include <stdio.h>
 #include "allFunctions.c"
 
-struct players;
-void emptymap(int n,char mapArray[][n *2 -1]);
-void setTextColor(int textColor, int backColor);
-void printMap(int side, char map[][2*side-1]);
-void printinformation(const struct players list[], int numofplayers);
-void clearScreen();
-int choseMoveOrWall();
-int putWall(int side,char map[][2*side-1]);
-int playersMovement(int side , char map[][2*side-1],int turn ,struct players *p);
-void putplayer(int length , char map[][2*length-1] ,int x ,int y , char ch);
-void exitButton();
 
 int main () {
     printf("Please enter the length of the game map (must be even and between 4 and 20!!!): ");
@@ -50,7 +39,7 @@ int main () {
         else if (result == 2) {
             if (list[turn-1].numofwall==0) i--;
             else {
-                if (putWall(side, map) == 1) {
+                if (putWall(list,side, map) == 1) {
                     list[turn - 1].numofwall--;
                 }
                 else i--;
