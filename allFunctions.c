@@ -2,8 +2,10 @@
 #include <windows.h>
 #include <conio.h>
 #include <stdlib.h>
+#include <time.h>
 
 struct players {
+    char type[10];
     char name[20];
     char shape;
     int numofwall;
@@ -11,21 +13,21 @@ struct players {
 };
 
 void emptymap(int n,char mapArray[][n *2 -1]){
-    int side=2*n-1;
-    for (int i = 0; i < side; i++){
-        for (int j = 0; j < side; j++) {
+    int length=2*n-1;
+    for (int i = 0; i < length; i++){
+        for (int j = 0; j < length; j++) {
             if (i%2==0 && j%2==1) mapArray[i][j] = 196;
             else if (i % 2 == 1 && j % 2 == 0) mapArray[i][j] =179;
             else if (i % 2 == 1 && j % 2 == 1) mapArray[i][j] =255;
             else if (i % 2 == 0 && j % 2 == 0) {
                 if(i==0 && j==0) mapArray[i][j]=218;
-                else if (i==0 && j==side-1) mapArray[i][j]=191;
-                else if (i==side-1 && j==0) mapArray[i][j]=192;
-                else if (i==side-1 && j==side-1) mapArray[i][j]=217;
+                else if (i==0 && j==length-1) mapArray[i][j]=191;
+                else if (i==length-1 && j==0) mapArray[i][j]=192;
+                else if (i==length-1 && j==length-1) mapArray[i][j]=217;
                 else if (j==0 && i%2==0) mapArray[i][j]=179;
                 else if (i==0 && j%2==0) mapArray[i][j]=196;
-                else if (j==side-1 && i%2==0) mapArray[i][j]=179;
-                else if (i==side-1 && j%2==0) mapArray[i][j]=196;
+                else if (j==length-1 && i%2==0) mapArray[i][j]=179;
+                else if (i==length-1 && j%2==0) mapArray[i][j]=196;
                 else mapArray[i][j]=197;
             }
         }
@@ -103,29 +105,43 @@ int choseMoveOrWall(){
     else choseMoveOrWall();
 }
 
-void DeepFirstSearch(int xpoint,int ypoint,int side,char map[][2*side-1],int visit[side-1][side-1]){
+void DeepFirstSearch(int xpoint,int ypoint,int length,char map[][2*length-1],int visit[length-1][length-1]){
     int xv=(xpoint-1)/2,yv=(ypoint-1)/2;
     visit[xv][yv] = 1;
-    if (xv<side-2 && map[xpoint+1][ypoint]!='=' && visit[xv+1][yv]!=1) DeepFirstSearch(xpoint+2,ypoint,side,map,visit);
-    if (xv>0 && map[xpoint-1][ypoint]!='=' && visit[xv-1][yv]!=1) DeepFirstSearch(xpoint-2,ypoint,side,map,visit);
-    if (yv<side-2 && map[xpoint][ypoint+1]!=':' && visit[xv][yv+1]!=1) DeepFirstSearch(xpoint,ypoint+2,side,map,visit);
-    if (yv>0 && map[xpoint][ypoint-1]!=':' && visit[xv][yv-1]!=1) DeepFirstSearch(xpoint,ypoint-2,side,map,visit);
+    if (xv<length-2 && map[xpoint+1][ypoint]!='=' && visit[xv+1][yv]!=1) DeepFirstSearch(xpoint+2,ypoint,length,map,visit);
+    if (xv>0 && map[xpoint-1][ypoint]!='=' && visit[xv-1][yv]!=1) DeepFirstSearch(xpoint-2,ypoint,length,map,visit);
+    if (yv<length-2 && map[xpoint][ypoint+1]!=':' && visit[xv][yv+1]!=1) DeepFirstSearch(xpoint,ypoint+2,length,map,visit);
+    if (yv>0 && map[xpoint][ypoint-1]!=':' && visit[xv][yv-1]!=1) DeepFirstSearch(xpoint,ypoint-2,length,map,visit);
     return ;
 }
 
-int putWall(struct players list[],int side,char map[][2*side-1]){
+int putWall(int turn ,struct players list[],int length,char map[][2*length-1]){
     int x,y;
     char type;
     printf("\nPlease enter the coordinates and type ('h' for horizontal & 'v' for vertical) of the wall(like this ==> 3 4 h):");
-    scanf("%d %d %c",&x,&y,&type);
+    srand(time(NULL));
+    if ( strcmp (list[turn-1].type,"random") == 0) {
+        int condition = rand()%2 ;
+        if (condition == 0) {
+            type = 'h';
+            x = (rand()%(length-2))+1;
+            y = rand()%(length-2);
+        }
+        else {
+            type = 'v';
+            x = rand()%(length-2);
+            y = (rand()%(length-2))+1;
+        }
+    }
+    else scanf("%d %d %c",&x,&y,&type);
     int sw=1;
     if (type=='v'){
-        if (y==0 || y==side-1  || x>=side-1) {
+        if (y==0 || y==length-1  || x>=length-1 || map[2*x+3][2*y]==':' || map[2*x+1][2*y]==':') {
             sw=0;
         }
     }
     else if (type=='h') {
-        if (x==0 || x==side-1 || y>=side-1) {
+        if (x==0 || x==length-1 || y>=length-1 || map[2*x][2*y+1]=='=' || map[2*x][2*y+3]=='=') {
             sw=0;
         }
     }
@@ -139,19 +155,19 @@ int putWall(struct players list[],int side,char map[][2*side-1]){
             map[2*x][2*y+3]= '=';
         }
         int sw2=0,sw3=0;
-        int visit[side-1][side-1];
-        for (int i=0 ; i<side-1 ; i++)
-            for (int j=0 ; j<side-1 ; j++)
+        int visit[length-1][length-1];
+        for (int i=0 ; i<length-1 ; i++)
+            for (int j=0 ; j<length-1 ; j++)
                 visit[i][j]=0;
-        DeepFirstSearch(list[0].x,list[0].y,side,map,visit);
-        for (int i=0 ; i<side-1 ; i++)
+        DeepFirstSearch(list[0].x,list[0].y,length,map,visit);
+        for (int i=0 ; i<length-1 ; i++)
             if (visit[0][i]==1) sw2=1;
-        for (int i=0 ; i<side-1 ; i++)
-            for (int j=0 ; j<side-1 ; j++)
+        for (int i=0 ; i<length-1 ; i++)
+            for (int j=0 ; j<length-1 ; j++)
                 visit[i][j]=0;
-        DeepFirstSearch(list[1].x,list[1].y,side,map,visit);
-        for (int i=0 ; i<side-1 ; i++)
-            if (visit[side-2][i]==1) sw3=1;
+        DeepFirstSearch(list[1].x,list[1].y,length,map,visit);
+        for (int i=0 ; i<length-1 ; i++)
+            if (visit[length-2][i]==1) sw3=1;
         if (sw2==0 || sw3==0) {
             sw=0;
             if (type=='v'){
@@ -167,12 +183,26 @@ int putWall(struct players list[],int side,char map[][2*side-1]){
     return sw;
 }
 
-int playersMovement(int side , char map[][2*side-1],int turn,struct players list[]){
+int playersMovement(int length , char map[][2*length-1],int turn,struct players list[]){
     int turn2,sw=1;
     if (turn==1) turn2=2;
     else turn2=1;
     printf("enter button to move the player: ");
-    char button = getch();
+    char button;
+    if ( strcmp (list[turn-1].type,"random") == 0){
+        srand(time(NULL));
+        int state = rand()%4;
+        switch (state) {
+            case 0 : button = 72;
+                break;
+            case 1 : button = 80;
+                break;
+            case 2 : button = 77;
+                break;
+            case 3 : button = 75;
+        }
+    }
+    else button = getch();
     if (button == 72) {
         if ( list[turn-1].x==1 || map[list[turn-1].x-1][list[turn-1].y]=='=') return 0;
         else {
@@ -190,7 +220,7 @@ int playersMovement(int side , char map[][2*side-1],int turn,struct players list
         }
     }
     else if (button == 80) {
-        if (list[turn-1].x==2*side-3 || map[list[turn-1].x+1][list[turn-1].y]=='=') return 0;
+        if (list[turn-1].x==2*length-3 || map[list[turn-1].x+1][list[turn-1].y]=='=') return 0;
         else {
             map[list[turn-1].x][list[turn-1].y]=' ';
             list[turn-1].x += 2;
@@ -206,7 +236,7 @@ int playersMovement(int side , char map[][2*side-1],int turn,struct players list
         }
     }
     else if (button == 77) {
-        if (list[turn-1].y==2*side-3 || map[list[turn-1].x][list[turn-1].y+1]=='!') return 0;
+        if (list[turn-1].y==2*length-3 || map[list[turn-1].x][list[turn-1].y+1]=='!') return 0;
         else {
             map[list[turn-1].x][list[turn-1].y]=' ';
             list[turn-1].y += 2;
@@ -237,16 +267,35 @@ int playersMovement(int side , char map[][2*side-1],int turn,struct players list
             }
         }
     }
-    if (sw==1) playersMovement(side, map,turn,list);
+    if (sw==1) playersMovement(length, map,turn,list);
 }
 
 void putplayer(int length , char map[][2*length-1] ,int x ,int y , char ch) {
     map[x][y] = ch;
 }
 
-int iswinner(int locWin,const struct players new) {
-    if (new.x==locWin) return 1;
-    else return 0;
+int iswinner(int length,struct players list[],int turn) {
+    int locWin;
+    switch (turn) {
+        case 1 : locWin = 1;
+            break;
+        case 2 : locWin = 2 * length - 3;
+            break;
+        case 3 : locWin = 2 * length -3;
+            break;
+        case 4 : locWin = 1;
+    }
+    int sw=0;
+    switch (turn) {
+        case 1 : if (list[turn-1].x==locWin) sw=1;
+            break;
+        case 2 : if (list[turn-1].x==locWin) sw=1;
+            break;
+        case 3 : if (list[turn-1].y==locWin) sw=1;
+            break;
+        case 4 : if (list[turn-1].y==locWin) sw=1;
+    }
+    return sw;
 }
 
 void exitButton() {
@@ -256,4 +305,15 @@ void exitButton() {
     do{
         ch=getch();
     } while (ch !=27);
+}
+
+void botplayer (int length,char map[][2*length-1],struct players list[],int turn) {
+    srand(time(NULL));
+    int state = (rand()%2) ;
+    if (state== 0) {
+        playersMovement(length,map,turn,list);
+    }
+    else {
+        putWall(turn,list,length,map);
+    }
 }
