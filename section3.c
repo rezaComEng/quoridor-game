@@ -61,22 +61,18 @@ int main () {
         printf("it`s player %s`s turn.",list[turn-1].name);
         printMap(length, map);
         if ( strcmp ( list[turn-1].type , "random") == 0){
-            botplayer(length,map,list,turn);
+            botplayer(numofplayers,length,map,list,turn);
         }
         else {
             printf("Press 'm' to move or 'w' to place the wall:");
             int resulte = choseMoveOrWall();
             if (resulte==1) {
-                int a = playersMovement(length,map,turn,list);
-                if (a == 0) i--;
+                if (0 == playersMovement( length, map, turn,list) ) i-- ;
             }
             else if (resulte == 2) {
-                if (list[turn-1].numofwall==0) i--;
+                if (list[turn-1].numofwall<=0) i--;
                 else {
-                    if (putWall(turn,list,length, map) == 1) {
-                        list[turn - 1].numofwall -- ;
-                    }
-                    else i--;
+                    if (putWall(turn,list,length, map) == 0) i-- ;
                 }
             }
         }

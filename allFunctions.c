@@ -68,7 +68,7 @@ void printMap(int n , char map[][2*n-1]) {
                     printf(" %c ",map[i][j]);
                 }
                 else {
-                    setTextColor(15,8);
+                    setTextColor(0,8);
                     printf(" %c ",map[i][j]);
                 }
             }
@@ -180,6 +180,7 @@ int putWall(int turn ,struct players list[],int length,char map[][2*length-1]){
             }
         }
     }
+    if (sw==1) list[turn-1].numofwall -- ;
     return sw;
 }
 
@@ -270,6 +271,7 @@ int playersMovement(int length , char map[][2*length-1],int turn,struct players 
     if (sw==1) playersMovement(length, map,turn,list);
 }
 
+
 void putplayer(int length , char map[][2*length-1] ,int x ,int y , char ch) {
     map[x][y] = ch;
 }
@@ -307,7 +309,7 @@ void exitButton() {
     } while (ch !=27);
 }
 
-void botplayer (int length,char map[][2*length-1],struct players list[],int turn) {
+void botplayer (int numofplayer , int length,char map[][2*length-1],struct players list[],int turn) {
     srand(time(NULL));
     int state = (rand()%2) ;
     if (state== 0) {
