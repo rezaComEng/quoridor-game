@@ -3,13 +3,14 @@
 
 
 int main () {
-    printf("Please enter the length of the game map (must be even and between 4 and 20!!!): ");
-    int length;
-    scanf("%d", &length);
-    int side = 2* length -1;
+    srand(1000*time(NULL));
+    int length=Length;
+    int side = 2 * Length -1;
     char map[side][side];
     emptymap(length,map);
-    int numofplayers = 2;
+    char filename[]="information";
+    struct DataGame datagame;
+    int numofplayers=2 , turn ;
     printf ("please enter number of the players(2 or 4):");
     do {
         if (numofplayers != 2 && numofplayers != 4) {
@@ -17,10 +18,11 @@ int main () {
         }
         scanf ("%d",&numofplayers);
     } while (numofplayers != 2 && numofplayers != 4);
+    struct players list[numofplayers];
+    datagame.numofplayers = numofplayers;
     printf("Enter the number of allowed walls:");
     int walls;
     scanf("%d", &walls);
-    struct players list[numofplayers];
     for (int i=0 ; i<numofplayers ; i++) {
         printf("choose human or random: ");
         scanf("%s", list[i].type);
@@ -32,57 +34,58 @@ int main () {
         switch (i) {
             case 0 : {
                 list[i].shape = '#';
-                list[i].x = side - 2, list[i].y = side / 2;
+                list[i].x = side - 3, list[i].y = (side / 2) -1;
                 break;
             }
             case 1 : {
                 list[i].shape = '*';
-                list[i].x = 1, list[i].y = side / 2;
+                list[i].x = 1, list[i].y = (side / 2)-1;
                 break;
             }
             case 2 : {
                 list[i].shape = '&';
-                list[i].x = side / 2, list[i].y = 1;
+                list[i].x = (side / 2)-1, list[i].y = 1;
                 break;
             }
             case 3 : {
                 list[i].shape = '@';
-                list[i].x = side / 2, list[i].y = side - 2;
+                list[i].x = (side / 2)-1, list[i].y = side - 3;
             }
         }
         putplayer(length,map,list[i].x,list[i].y,list[i].shape);
+        turn=1;
     }
-    int turn,i=0;
-    int areiswin=0;
     do {
-        turn = (i%numofplayers) + 1 ;
         clearScreen();
         printinformation(list, numofplayers);
-        printf("it`s player %s`s turn.",list[turn-1].name);
+        printf("It is player %d's turn",turn);
         printMap(length, map);
+        printf("for save the game press Esc button.\n");
+        saveInformation(turn,datagame,list,map);
         if ( strcmp ( list[turn-1].type , "random") == 0){
-            botplayer(numofplayers,length,map,list,turn);
+            botplayer(datagame,numofplayers,walls,length,map,list,turn);
         }
         else {
             printf("Press 'm' to move or 'w' to place the wall:");
-            int resulte = choseMoveOrWall();
+            int resulte = choseMoveOrWall(datagame);
             if (resulte==1) {
-                if (0 == playersMovement( length, map, turn,list) ) i-- ;
+                if ( playersMovement(datagame , length, map, turn,list)==0  ) turn-- ;
             }
             else if (resulte == 2) {
-                if (list[turn-1].numofwall<=0) i--;
+                if (list[turn-1].numofwall<=0) turn--;
                 else {
-                    if (putWall(turn,list,length, map) == 0) i-- ;
+                    if (putWall(datagame,numofplayers,turn,list,length, map) == 0) turn-- ;
                 }
             }
         }
-        if (iswinner(length,list,turn)==1) areiswin=1;
-        i++;
-    } while (!areiswin);
+        if (iswinner(length,list,turn)==1) break;
+        turn++;
+        if ( turn>numofplayers ) turn = (turn%numofplayers);
+    } while (1);
     clearScreen();
     printinformation(list, numofplayers);
     printMap(length, map);
-    printf("%s is winner.",list[turn-1].name);
+    printf("player %d is winner.",turn);
     exitButton();
     return 0;
 }
