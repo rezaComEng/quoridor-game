@@ -33,7 +33,7 @@ struct DataGame {
     char map[19][19];
 };
 
-void SaveGame(const char *fileName,const struct DateGame *dataname){
+void SaveGame(char *fileName,const struct DateGame *dataname){
     FILE* file=fopen(fileName,"wb");
     if ( file != NULL ) {
         fwrite(dataname, sizeof(struct DataGame),1,file);
@@ -142,18 +142,25 @@ void clearScreen() {
     system("cls");
 }
 
-int choseMoveOrWall(const struct DataGame dataname){
+int choseMoveOrWall(FILE * filecount, FILE * filenames ,const struct DataGame dataname){
     char selection;
     selection = getche();
     if (selection == 27) {
+        int count;
+        fread(&count,sizeof(int),1,filecount);
+        count ++;
         printf("\nenter name of file:");
-        char filename[20];
-        scanf("%s",filename);
-        SaveGame(&filename,&dataname);
+        char Fname[20];
+        scanf("%s",Fname);
+        fseek(filenames,0,SEEK_END);
+        fwrite(Fname,sizeof(Fname),1,filenames);
+        SaveGame(&Fname,&dataname);
+        fseek(filecount,0,SEEK_SET);
+        fwrite(&count,sizeof(int),1,filecount);
     }
     else if (selection == 'm') return 1;
     else if (selection == 'w') return 2;
-    else choseMoveOrWall(dataname);
+    else choseMoveOrWall(filecount,filenames,dataname);
 }
 
 void DeepFirstSearch(int xpoint,int ypoint,int length,char map[][2*length-1],int visit[length-1][length-1]){
@@ -166,7 +173,7 @@ void DeepFirstSearch(int xpoint,int ypoint,int length,char map[][2*length-1],int
     return ;
 }
 
-int putWall(const struct DataGame dataname,int numofplayer,int turn ,struct players list[],int length,char map[][2*length-1]){
+int putWall(FILE * filecount, FILE * filenames ,const struct DataGame dataname,int numofplayer,int turn ,struct players list[],int length,char map[][2*length-1]){
     int x,y;
     char type;
     printf("\nPlease enter the type ('h' for horizontal & 'v' for vertical) and coordinates of the wall(like this ==> h 3 4):");
@@ -186,10 +193,17 @@ int putWall(const struct DataGame dataname,int numofplayer,int turn ,struct play
     else {
         type = getche();
         if (type == 27) {
+            int count;
+            fread(&count,sizeof(int),1,filecount);
+            count ++;
             printf("\nenter name of file:");
-            char filename[20];
-            scanf("%s",filename);
-            SaveGame(&filename,&dataname);
+            char Fname[20];
+            scanf("%s",Fname);
+            fseek(filenames,0,SEEK_END);
+            fwrite(Fname,sizeof(Fname),1,filenames);
+            SaveGame(&Fname,&dataname);
+            fseek(filecount,0,SEEK_SET);
+            fwrite(&count,sizeof(int),1,filecount);
         }
         scanf("%d %d",&x,&y);
     }
@@ -264,7 +278,7 @@ int putWall(const struct DataGame dataname,int numofplayer,int turn ,struct play
     return sw;
 }
 
-int playersMovement(struct DataGame dataname,int length , char map[][2*length-1],int turn,struct players list[]){
+int playersMovement(FILE * filecount, FILE * filenames ,struct DataGame dataname,int length , char map[][2*length-1],int turn,struct players list[]){
     int turn2,sw=1,key=1;
     if (turn==1) turn2=2;
     else turn2=1;
@@ -302,10 +316,17 @@ int playersMovement(struct DataGame dataname,int length , char map[][2*length-1]
     }
     else button = getch();
     if (button == 27) {
+        int count;
+        fread(&count,sizeof(int),1,filecount);
+        count ++;
         printf("\nenter name of file:");
-        char filename[20];
-        scanf("%s",filename);
-        SaveGame(&filename,&dataname);
+        char Fname[20];
+        scanf("%s",Fname);
+        fseek(filenames,0,SEEK_END);
+        fwrite(Fname,sizeof(Fname),1,filenames);
+        SaveGame(&Fname,&dataname);
+        fseek(filecount,0,SEEK_SET);
+        fwrite(&count,sizeof(int),1,filecount);
     }
       if (button == 72) {
         if ( list[turn-1].x==1 || map[list[turn-1].x-1][list[turn-1].y]=='=') return 0;
@@ -379,7 +400,7 @@ int playersMovement(struct DataGame dataname,int length , char map[][2*length-1]
             }
         }
     }
-    if (sw==1) playersMovement(dataname,length, map,turn,list);
+    if (sw==1) playersMovement(filecount,filenames,dataname,length, map,turn,list);
 }
 
 void putplayer(int length , char map[][2*length-1] ,int x ,int y , char ch) {
@@ -419,13 +440,13 @@ void exitButton() {
     } while (ch !=27);
 }
 
-void botplayer (struct DataGame dataname,int numofplayer ,int walls, int length,char map[][2*length-1],struct players list[],int turn) {
+void botplayer (FILE * filecount, FILE * filenames ,struct DataGame dataname,int numofplayer , int length,char map[][2*length-1],struct players list[],int turn) {
     int state; state= getRandomNumber(1,2);
     if (state== 1) {
-        playersMovement(dataname,length,map,turn,list);
+        playersMovement(filecount,filenames,dataname,length,map,turn,list);
     }
     else if(state== 2) {
-        if(list[turn-1].numofwall>0) putWall(dataname, numofplayer, turn, list, length, map);
-        else playersMovement(dataname,length,map,turn,list);
+        if(list[turn-1].numofwall>0) putWall(filecount,filenames,dataname, numofplayer, turn, list, length, map);
+        else playersMovement(filecount,filenames,dataname,length,map,turn,list);
     }
 }
