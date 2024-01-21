@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "allFunctions.c"
-#include<string.h>
+#include <string.h>
 
 int main () {
     srand(1000*time(NULL)) ;
@@ -14,9 +14,10 @@ int main () {
     FILE* filenames = fopen("filenames.dat","r+b") ;
     int numofplayers=2 , turn ;
     struct players list[4];
-    printf ("Do you want to load one of your last games?(answer with yes or no)");
+    printf ("Do you want to load one of your last games?(answer with yes or no) :");
     scanf("%s",userAnswer);
     int count;
+    fseek(filecount,0,SEEK_SET);
     fread(&count,sizeof(int),1,filecount);
     if(strcmp(userAnswer,"yes")==0 && count!=0) {
         char name[20];
@@ -34,14 +35,9 @@ int main () {
         fseek(filenames,anser-1,SEEK_SET);
         fread(name, sizeof(name),1,filenames);
         loadGame(name,&datagame);
-        for ( i=0 ; i<datagame.numofplayers ; i++){
-            list[i]=datagame.list[i];
-        }
-        numofplayers = datagame.numofplayers;
-        turn = datagame.turn;
-        for ( i=0 ; i<19 ; i++)
-            for (int j= 0 ; j<19 ; j++)
-                map[i][j] = datagame.map[i][j];
+        receiveInformation(turn,datagame,list,map);
+        fclose(filenames);
+        fclose(filecount);
     }
     else {
         printf ("please enter number of the players(2 or 4):");

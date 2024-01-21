@@ -26,27 +26,41 @@ struct players {
     int x,y;
 };
 
-struct DataGame {
+struct Datagame {
     int numofplayers;
     int turn;
     struct players list[4];
     char map[19][19];
 };
 
-void SaveGame(char *fileName,const struct DateGame *dataname){
-    FILE* file=fopen(fileName,"wb");
-    if ( file != NULL ) {
-        fwrite(dataname, sizeof(struct DataGame),1,file);
-        fclose(file);
+void SaveGame(char* name,struct DataGame* datagame) {
+    FILE* file;
+    if ((file = fopen(name, "wb")) == NULL) {
+        printf("Couldn't open the file %s\n", name);
+        exit(1);
     }
+
+    if (fwrite(datagame, sizeof(datagame), 1, file) != 1) {
+        printf("Failed to write data to file %s\n", name);
+        exit(1);
+    }
+
+    fclose(file);
 }
 
-void loadGame(const char *fileName,const struct DataGame *dataname) {
-    FILE* file = fopen(fileName,"rb");
-    if ( file != NULL ) {
-        fread(dataname, sizeof(struct DataGame),1,file);
-        fclose(file);
+void loadGame(char* name,struct DataGame *datagame) {
+    FILE* file;
+    if ((file = fopen(name, "r")) == NULL) {
+        printf("Couldn't open the file %s\n", name);
+        exit(1);
     }
+
+    if (fread(datagame, sizeof(datagame), 1, file) != 1) {
+        printf("Failed to read data from file %s\n", name);
+        exit(1);
+    }
+
+    fclose(file);
 }
 
 void emptymap(int n,char mapArray[][n *2 -1]){
@@ -129,13 +143,22 @@ void printinformation(const struct players list[] , int numofplayers) {
     }
 }
 
-void saveInformation(int turn,struct DataGame dataname,const struct players list[],const int map[][19]){
+void saveInformation(int turn,struct DataGame dataname,const struct players list[],const char map[][19]){
     dataname.turn = turn;
-    for (int i=0 ; i<dataname.numofplayers ; i++)
+    for (int i=0 ; i<4 ; i++)
         dataname.list[i] = list[i];
     for (int i=0 ; i<19 ; i++)
         for (int j=0 ; j<19 ; j++)
             dataname.map[i][j] = map[i][j];
+}
+
+void receiveInformation(int turn,const struct DataGame dataname,struct players list[],char map[][19]){
+    turn = dataname.turn;
+    for (int i=0 ; i<4 ; i++)
+        list[i] = dataname.list[i];
+    for (int i=0 ; i<19 ; i++)
+        for (int j=0 ; j<19 ; j++)
+            map[i][j] = dataname.map[i][j];
 }
 
 void clearScreen() {
@@ -196,7 +219,7 @@ int putWall(FILE * filecount, FILE * filenames ,const struct DataGame dataname,i
             int count;
             fread(&count,sizeof(int),1,filecount);
             count ++;
-            printf("\nenter name of file:");
+            printf("\n enter name of file:");
             char Fname[20];
             scanf("%s",Fname);
             fseek(filenames,0,SEEK_END);
