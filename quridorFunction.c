@@ -20,39 +20,73 @@ struct DataGame{
     int NumOfPlayers ;
     char map[19][19] ;
     struct Players list[4];
+//    char filename[20];
 };
 
-void emptymap(int length,char mapArray[][length *2 +1]){
+void deleteFromFile(size_t size, int organ, FILE* filename) {
+    FILE* tempfile = fopen("temp.dat", "w+b");
+    if (!tempfile) {
+        printf("Failed to open temporary file.\n");
+        return;
+    }
+    char *temp = (char*)malloc(size);
+    if (!temp) {
+        printf("Memory allocation failed.\n");
+        fclose(tempfile);
+        return;
+    }
+    fseek(filename,0,SEEK_SET);
+    fread((void *)temp,size,1,filename);
+    for (int i=0 ; i<organ-1 && !feof(filename) ; i++) {
+        fwrite((void *)temp,size,1,tempfile);
+        fread((void *)temp,size,1,filename);
+    }
+    fread((void *)temp,size,1,filename);
+    while ( !feof(filename) ) {
+        fwrite((void *)temp,size,1,tempfile);
+        fread((void *)temp,size,1,filename);
+    }
+    free(temp);
+    fclose(filename);
+    fclose(tempfile);
+
+    rename(tempfile, filename);
+    remove(filename);
+}
+
+void emptymap(int length,struct DataGame *data){
     for (int i=0 ; i<2 * length +1 ; i++){
         for (int j = 0; j < 2 * length +1; j++) {
-            if (i%2==0 && j%2==1) mapArray[i][j] = 196;
-            else if (i % 2 == 1 && j % 2 == 0) mapArray[i][j] =179;
-            else if (i % 2 == 1 && j % 2 == 1) mapArray[i][j] =' ';
+            if (i%2==0 && j%2==1) data->map[i][j] = 196;
+            else if (i % 2 == 1 && j % 2 == 0) data->map[i][j] =179;
+            else if (i % 2 == 1 && j % 2 == 1) data->map[i][j] =' ';
             else if (i % 2 == 0 && j % 2 == 0) {
-                if(i==0 && j==0) mapArray[i][j]=218;
-                else if (i==0 && j==2 * length) mapArray[i][j]=191;
-                else if (i==2 * length && j==0) mapArray[i][j]=192;
-                else if (i==2 * length && j==2 * length) mapArray[i][j]=217;
-                else if (j==0 && i%2==0) mapArray[i][j]=179;
-                else if (i==0 && j%2==0) mapArray[i][j]=196;
-                else if (j==2 * length && i%2==0) mapArray[i][j]=179;
-                else if (i==2 * length && j%2==0) mapArray[i][j]=196;
-                else mapArray[i][j]=197;
+                if(i==0 && j==0) data->map[i][j]=218;
+                else if (i==0 && j==2 * length) data->map[i][j]=191;
+                else if (i==2 * length && j==0) data->map[i][j]=192;
+                else if (i==2 * length && j==2 * length) data->map[i][j]=217;
+                else if (j==0 && i%2==0) data->map[i][j]=179;
+                else if (i==0 && j%2==0) data->map[i][j]=196;
+                else if (j==2 * length && i%2==0) data->map[i][j]=179;
+                else if (i==2 * length && j%2==0) data->map[i][j]=196;
+                else data->map[i][j]=197;
             }
         }
     }
 }
 
 void InitializeData (struct DataGame *data) {
-    printf("1) NewGame\n2) LoadGame\n") ;
     int Request, sw=0;
     while (sw == 0) {
+        system("cls");
+        printf("1) NewGame\n2) LoadGame\n") ;
         while (1) {
             scanf ( "%d" , &Request ) ;
             if (Request==1 || Request==2) break;
         }
         switch (Request) {
             case 1 :{
+//                strcpy(data->filename,"empty");
                 data->Turn = 1;
                 printf("chose number of players (2 or 4):\n");
                 while (1) {
@@ -61,7 +95,7 @@ void InitializeData (struct DataGame *data) {
                 }
                 printf("please enter number of walls:\n");
                 int numWalls,length=Length;
-                emptymap(length,data->map);
+                emptymap(length,data);
                 scanf("%d",&numWalls);
                 for (int i=0 ; i<data->NumOfPlayers ; i++){
                     data->list[i].NumOfWall = numWalls;
@@ -72,19 +106,19 @@ void InitializeData (struct DataGame *data) {
                             data->list[i].x = 2*length -1;
                             data->list[i].y = length;
                             data->list[i].Shape = 147;
-                            printf("enter the type of the players(1. bot & 2. human):\n");
+                            printf("enter the type of the players(1. human & 2. bot ):\n");
                             while (1) {
                                 int order;
                                 scanf("%d",&order);
                                 if (order == 1) {
-                                    strcpy(data->list[i].type, "random");
-                                    strcpy(data->list[i].Name, "bot1");
-                                    break;
-                                }
-                                else if (order == 2) {
                                     strcpy(data->list[i].type,"human");
                                     printf("enter name of the player:\n");
                                     scanf("%s",data->list[i].Name);
+                                    break;
+                                }
+                                else if (order == 2) {
+                                    strcpy(data->list[i].type, "random");
+                                    strcpy(data->list[i].Name, "bot1");
                                     break;
                                 }
                             }
@@ -94,19 +128,19 @@ void InitializeData (struct DataGame *data) {
                             data->list[i].x = 1;
                             data->list[i].y = length;
                             data->list[i].Shape = 36;
-                            printf("enter the type of the players(1. bot & 2. human):\n");
+                            printf("enter the type of the players(1. human & 2. bot ):\n");
                             while (1) {
                                 int order;
                                 scanf("%d",&order);
                                 if (order == 1) {
-                                    strcpy(data->list[i].type, "random");
-                                    strcpy(data->list[i].Name, "bot2");
-                                    break;
-                                }
-                                else if (order == 2) {
                                     strcpy(data->list[i].type,"human");
                                     printf("enter name of the player:\n");
                                     scanf("%s",data->list[i].Name);
+                                    break;
+                                }
+                                else if (order == 2) {
+                                    strcpy(data->list[i].type, "random");
+                                    strcpy(data->list[i].Name, "bot2");
                                     break;
                                 }
                             }
@@ -116,19 +150,19 @@ void InitializeData (struct DataGame *data) {
                             data->list[i].x = length;
                             data->list[i].y = 1;
                             data->list[i].Shape = 35;
-                            printf("enter the type of the players(1. bot & 2. human):\n");
+                            printf("enter the type of the players(1. human & 2. bot ):\n");
                             while (1) {
                                 int order;
                                 scanf("%d",&order);
                                 if (order == 1) {
-                                    strcpy(data->list[i].type, "random");
-                                    strcpy(data->list[i].Name, "bot3");
-                                    break;
-                                }
-                                else if (order == 2) {
                                     strcpy(data->list[i].type,"human");
                                     printf("enter name of the player:\n");
                                     scanf("%s",data->list[i].Name);
+                                    break;
+                                }
+                                else if (order == 2) {
+                                    strcpy(data->list[i].type, "random");
+                                    strcpy(data->list[i].Name, "bot3");
                                     break;
                                 }
                             }
@@ -138,19 +172,19 @@ void InitializeData (struct DataGame *data) {
                             data->list[i].x = length;
                             data->list[i].y = 2*length -1;
                             data->list[i].Shape = 42;
-                            printf("enter the type of the players(1. bot & 2. human):\n");
+                            printf("enter the type of the players(1. human & 2. bot ):\n");
                             while (1) {
                                 int order;
                                 scanf("%d",&order);
                                 if (order == 1) {
-                                    strcpy(data->list[i].type, "random");
-                                    strcpy(data->list[i].Name, "bot4");
-                                    break;
-                                }
-                                else if (order == 2) {
                                     strcpy(data->list[i].type,"human");
                                     printf("enter name of the player:\n");
                                     scanf("%s",data->list[i].Name);
+                                    break;
+                                }
+                                else if (order == 2) {
+                                    strcpy(data->list[i].type, "random");
+                                    strcpy(data->list[i].Name, "bot4");
                                     break;
                                 }
                             }
@@ -165,6 +199,7 @@ void InitializeData (struct DataGame *data) {
             case 2 :{
                 FILE* filenames = fopen("filenames","r+b");
                 if (!filenames){
+                    remove(filenames);
                     printf("there isn`t any game to load.(press 1 to play a nuw game).\n");
                 }
                 else {
@@ -187,7 +222,9 @@ void InitializeData (struct DataGame *data) {
                     fclose(filenames);
                     FILE* fileData = fopen(name,"rb");
                     if (!fileData){
-                        printf("there isn`t that file.(press 1 to play a nuw game).\n");
+                        printf("there isn`t that file.\n");
+                        deleteFromFile(sizeof(name),order,filenames);
+                        sleep(1);
                     } else {
                         fread(data,sizeof(*data),1,fileData);
                         sw=1;
@@ -200,7 +237,6 @@ void InitializeData (struct DataGame *data) {
 }
 
 int getRandomNumber(int lower, int upper) {
-    sleep(1);
     int range = upper - lower + 1;
     int randomNumber = rand();
     int scaledNumber = (randomNumber / (RAND_MAX + 1.0)) * range;
@@ -268,13 +304,14 @@ void printinformation(const struct DataGame data) {
         printf("number of Walls: ");
         setTextColor(4,0);
         printf("%d \n",data.list[i].NumOfWall);
-        setTextColor(0,0);
+        setTextColor(7,0);
     }
 }
 
 int choseMoveOrWall(const struct DataGame data){
     char selection;
     if ( strcmp(data.list[data.Turn-1].type,"random") == 0 ){
+        sleep(1);
         int rand = getRandomNumber(1,4);
         if (rand == 1 || rand == 3) selection = 'm';
         else selection = 'w';
@@ -290,9 +327,14 @@ int choseMoveOrWall(const struct DataGame data){
         }
     }
     if (selection == 27) {
-        printf("eeenter name of file:\n");
+        printf("eenter name of file:\n");
         char Fname[20];
+//        if ( strcmp(data.filename,"empty") != 0 ){
+//            strcpy(Fname , data.filename) ;
+//        } else {
         scanf("%s",Fname);
+//        }
+//        strcpy(data.filename,Fname);
         FILE* filenames = fopen("filenames","ab");
         fwrite(Fname,sizeof(Fname),1,filenames);
         FILE* fileData = fopen(Fname,"wb");
@@ -539,11 +581,150 @@ void exitButton() {
     } while (ch !=27);
 }
 
+int magicBox(struct DataGame *data){
+    int length = Length;
+    int rand = getRandomNumber(1,2);
+    switch(rand){
+        case 1 :{
+            rand = getRandomNumber(1 , 2);
+            switch (rand) {
+                case 1 :{
+                    rand = getRandomNumber(1,3);
+                    switch (rand) {
+                        case 1:{
+                            data->list[data->Turn-1].NumOfWall += 2;
+                            printf("Two were added to your wall capacity.\n");
+                            break;
+                        }
+                        case 2:{
+                            data->list[data->Turn-1].NumOfWall += 3;
+                            printf("Three were added to your wall capacity.\n");
+                            break;
+                        }
+                        case 3:{
+                            data->list[data->Turn-1].NumOfWall += 5;
+                            printf("Five were added to your wall capacity.\n");
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case 2 :{
+                    rand = getRandomNumber(1,2);
+                    switch (rand) {
+                        case 1:{
+                            for (int i=0 ; i<data->NumOfPlayers ; i++){
+                                if (i+1 != data->Turn && data->list[i].NumOfWall>=1) data->list[i].NumOfWall --;
+                            }
+                            data->list[data->Turn].NumOfWall += 1;
+                            printf("A wall has been added to you & a wall has been removed from your opponents.\n");
+                            break;
+                        }
+                        case 2:{
+                            for (int i=0 ; i<data->NumOfPlayers ; i++){
+                                if ( i+1 != data->Turn ) {
+                                    if ( data->list[i].NumOfWall > 1 ) data->list[i].NumOfWall -= 2;
+                                    else data->list[i].NumOfWall = 0;
+                                }
+                            }
+                            data->list[data->Turn].NumOfWall += 2;
+                            printf("Two walls have been added to you & two walls have been removed from your opponents.\n"
+                                   ""
+                                   "");
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case 2:{
+            rand = getRandomNumber(1,3 );
+            switch (rand) {
+                case 1 :{
+                    for (int i=1 ; i<2*length ; i++){
+                        for (int j = 1 ; j<2*length ; j++){
+                            if (data->map[i][j] == ':') data->map[i][j] = 179;
+                            if (data->map[i][j] == '=' && j%2==1) data->map[i][j] = 196;
+                            if (data->map[i][j] == '=' && j%2==0) data->map[i][j] = 197;
+                        }
+                    }
+                    printf("All Of Walls were removed.\n");
+                    break;
+                }
+                case 2:{
+                    rand = getRandomNumber(1,3);
+                    switch (rand) {
+                        case 1:{
+                            if ( data->list[data->Turn-1].NumOfWall > 1) data->list[data->Turn-1].NumOfWall -=2;
+                            else data->list[data->Turn-1].NumOfWall = 0;
+                            break;
+                            printf("Two Walls Were Decreased From You`r Wall Capacity.\n");
+                        }
+                        case 2:{
+                            if ( data->list[data->Turn-1].NumOfWall > 2) data->list[data->Turn-1].NumOfWall -= 3;
+                            else data->list[data->Turn-1].NumOfWall = 0;
+                            printf("Three Walls Were Decreased From You`r Wall Capacity.\n");
+                            break;
+                        }
+                        case 3:{
+                            if ( data->list[data->Turn-1].NumOfWall > 4) data->list[data->Turn-1].NumOfWall -= 5;
+                            else data->list[data->Turn-1].NumOfWall = 0;
+                            printf("Five Walls Were Decreased From You`r Wall Capacity.\n");
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case 3:{
+                    rand = getRandomNumber(1,2);
+                    switch (rand) {
+                        case 1:{
+                            return 1 ;
+                            break;
+                        }
+                        case 2:{
+                            return 2;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+    }
+    return 0;
+}
+
 void playGame(struct DataGame* data){
     int length=Length;
+    int block[4]={0,0,0,0};
+    int lastTern = 0 , newTern = 2;
     while(1){
+        newTern = data->Turn;
         system("cls");
+        setTextColor(5,0);
+        printf("The magic box chose this for you:\n");
+        if (lastTern != newTern) {
+            block[data->Turn-1] = magicBox(data);
+            if (block[data->Turn-1] != 0) {
+                block[data->Turn-1] -- ;
+                data->Turn ++ ;
+                if (data->Turn > data->NumOfPlayers) {
+                    data->Turn -= data->NumOfPlayers;
+                }
+            }
+        }
+        lastTern = data->Turn ;
+        setTextColor(7,0);
         printinformation(*data);
+        for (int i=0 ; i<4 ; i++) {
+            if (block[i] != 0 ){
+                printf ("Player %d is blocked for the next %d rounds.\n",i+1,block[i]);
+            }
+        }
         printMap(length,*data);
         setTextColor(9,0);
         printf("It is player %d's turn.\n",data->Turn);
