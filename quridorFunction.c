@@ -85,7 +85,6 @@ void InitializeData (struct DataGame *data) {
         }
         switch (Request) {
             case 1 :{
-//                strcpy(data->filename,"empty");
                 data->Turn = 1;
                 printf("chose number of players (2 or 4):\n");
                 while (1) {
@@ -330,12 +329,7 @@ int choseMoveOrWall(const struct DataGame data){
     if (selection == 27) {
         printf("eenter name of file:\n");
         char Fname[20];
-//        if ( strcmp(data.filename,"empty") != 0 ){
-//            strcpy(Fname , data.filename) ;
-//        } else {
         scanf("%s",Fname);
-//        }
-//        strcpy(data.filename,Fname);
         FILE* filenames = fopen("filenames","ab");
         fwrite(Fname,sizeof(Fname),1,filenames);
         FILE* fileData = fopen(Fname,"wb");
