@@ -1,9 +1,9 @@
-#include <stdio.h>
+#include <time.h>
 #include "quridorFunction.c"
 
 
-
 int main() {
+
     srand(time(NULL));
     int i, j, k, n, m, choice;
     struct DataGame *data;

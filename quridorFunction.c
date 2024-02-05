@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <conio.h>
-#include <time.h>
 #include <unistd.h>
 
 #define Length 9;
@@ -36,22 +35,22 @@ void deleteFromFile(size_t size, int organ, FILE* filename) {
         return;
     }
     fseek(filename,0,SEEK_SET);
-    fread((void *)temp,size,1,filename);
+    fread((void *)temp,sizeof(temp),1,filename);
     for (int i=0 ; i<organ-1 && !feof(filename) ; i++) {
-        fwrite((void *)temp,size,1,tempfile);
-        fread((void *)temp,size,1,filename);
+        fwrite((void *)temp,sizeof(temp),1,tempfile);
+        fread((void *)temp,sizeof(temp),1,filename);
     }
-    fread((void *)temp,size,1,filename);
+    fread((void *)temp,sizeof(temp),1,filename);
     while ( !feof(filename) ) {
-        fwrite((void *)temp,size,1,tempfile);
-        fread((void *)temp,size,1,filename);
+        fwrite((void *)temp,sizeof(temp),1,tempfile);
+        fread((void *)temp,sizeof(temp),1,filename);
     }
     free(temp);
-    fclose(filename);
-    fclose(tempfile);
-
     rename(tempfile, filename);
     remove(filename);
+
+    fclose(filename);
+    fclose(tempfile);
 }
 
 void emptymap(int length,struct DataGame *data){
@@ -211,6 +210,7 @@ void InitializeData (struct DataGame *data) {
                         printf("%d. %s\n",i,name);
                         fread(name,sizeof(name),1,filenames);
                     }
+                    if (i==0) remove(filenames);
                     printf("enter num of file that you want:\n");
                     int order;
                     while(1){
@@ -250,7 +250,6 @@ void setTextColor(int textColor, int backColor) {
 }
 
 void printMap(int length , struct DataGame data){
-    printf("\n");
     for (int i=-1 ; i<2*length+1 ; i++) {
         for (int j=-1 ; j<2*length+1 ; j++) {
             if ((i==-1 || j==-1) ) {
@@ -285,7 +284,6 @@ void printMap(int length , struct DataGame data){
         printf("\n");
     }
     setTextColor(7,0);
-    printf("\n");
 }
 
 void printinformation(const struct DataGame data) {
@@ -542,7 +540,6 @@ int playersMovement(struct DataGame *data){
     }
     data->map[data->list[data->Turn-1].x][data->list[data->Turn-1].y]=data->list[data->Turn-1].Shape;
     if (sw==0) {
-        playersMovement(data);
         return 0;
     }
     else return 1;
@@ -701,39 +698,44 @@ int magicBox(struct DataGame *data){
 void playGame(struct DataGame* data){
     int length=Length;
     int block[4]={0,0,0,0};
-    int lastTern = 0 , newTern = 2;
     while(1){
-        newTern = data->Turn;
         system("cls");
         setTextColor(5,0);
         printf("The magic box chose this for you:\n");
-        if (lastTern != newTern) {
-            block[data->Turn-1] = magicBox(data);
-            if (block[data->Turn-1] != 0) {
-                block[data->Turn-1] -- ;
-                data->Turn ++ ;
-                if (data->Turn > data->NumOfPlayers) {
-                    data->Turn -= data->NumOfPlayers;
-                }
+        block[data->Turn-1] = magicBox(data);
+        if (block[data->Turn-1] != 0) {
+            block[data->Turn-1] -- ;
+            data->Turn ++ ;
+            if (data->Turn > data->NumOfPlayers) {
+                data->Turn -= data->NumOfPlayers;
             }
         }
-        lastTern = data->Turn ;
-        setTextColor(7,0);
         printinformation(*data);
+        printMap(length,*data);
         for (int i=0 ; i<4 ; i++) {
             if (block[i] != 0 ){
                 printf ("Player %d is blocked for the next %d rounds.\n",i+1,block[i]);
             }
         }
-        printMap(length,*data);
         setTextColor(9,0);
         printf("It is player %d's turn.\n",data->Turn);
         setTextColor(7,0);
         if ( choseMoveOrWall(*data) == 2 && data->list[data->Turn-1].NumOfWall>0) {
-            if ( !putWall(data) ) data->Turn --;
-        } else {
+            while (1) {
+                if (putWall(data)) break;
+            }
+        }
+        else if (data->list[data->Turn-1].NumOfWall == 0) {
+            printf("\nyou dont have any wall, enter button to move the player: ");
+            while (1) {
+                if (playersMovement(data)) break;
+            }
+        }
+        else {
             printf("\nenter button to move the player: ");
-            if ( !playersMovement(data) ) data->Turn --;
+            while (1) {
+                if (playersMovement(data)) break;
+            }
         }
         if (iswinner(length,*data)) {
             system("cls");
