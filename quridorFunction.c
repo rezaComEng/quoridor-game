@@ -702,6 +702,7 @@ void playGame(struct DataGame* data){
         block[data->Turn-1] = magicBox(data);
         if (block[data->Turn-1] != 0) {
             block[data->Turn-1] -- ;
+            sleep(2);
             data->Turn ++ ;
             if (data->Turn > data->NumOfPlayers) {
                 data->Turn -= data->NumOfPlayers;
